@@ -8,6 +8,16 @@ public class Service
 private Class serviceClass;
 private String path;
 private Method service;
+private String forwardTo;
+
+public Service()
+{
+serviceClass = null;
+path = null;
+service = null;
+forwardTo = null;
+}
+
 public void setServiceClass(Class serviceClass)
 {
 this.serviceClass = serviceClass;
@@ -33,5 +43,14 @@ this.service = service;
 public Method getService()
 {
 return this.service;
+}
+
+public void setForwardTo(String forwardTo)
+{
+this.forwardTo = forwardTo;
+}
+public String getForwardTo()
+{
+return this.forwardTo;
 }
 }
