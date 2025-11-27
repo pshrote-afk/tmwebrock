@@ -124,18 +124,40 @@ ServletContext servletContext = getServletContext();
 Map<String,Service> servicesMap = (HashMap)servletContext.getAttribute("ServicesMap");
 
 Service serviceObject = servicesMap.get(clientPath);
-System.out.println(serviceObject.getServiceClass());
-System.out.println(serviceObject.getPath());
-System.out.println(serviceObject.getService());
 Class<?> serviceClass = serviceObject.getServiceClass();
-String path = serviceObject.getPath();
 Method service = serviceObject.getService();
+String forwardTo = serviceObject.getForwardTo();
+
+System.out.println("Forward to: "+forwardTo);
+
 
 //part 3
 Object obj1 = serviceClass.getDeclaredConstructor().newInstance();
 Object returnResponse;
 returnResponse = service.invoke(obj1);
 if(returnResponse==null) returnResponse = "";	//return empty string if "service" has "void" return type
+
+if(forwardTo!=null)
+{
+Service serviceForwardObject = servicesMap.get(forwardTo);
+if(serviceForwardObject!=null)
+{
+System.out.println("Entered manual obj2 invocation");
+serviceClass = serviceForwardObject.getServiceClass();
+service = serviceForwardObject.getService();
+
+Object obj2 = serviceClass.getDeclaredConstructor().newInstance();
+returnResponse = service.invoke(obj2);
+if(returnResponse==null) returnResponse = "";	//return empty string if "service" has "void" return type
+}
+else
+{
+System.out.println("Entered forward to a regular servlet");
+RequestDispatcher requestDispatcher;
+requestDispatcher = request.getRequestDispatcher(forwardTo);
+requestDispatcher.forward(request,response);
+}
+}
 
 pw.print(returnResponse);
 pw.flush();
