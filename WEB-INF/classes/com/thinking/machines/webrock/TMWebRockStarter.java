@@ -8,7 +8,7 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import com.thinking.machines.webrock.pojo.*;
 import com.thinking.machines.webrock.model.*;
-import com.thinking.machines.webrock.annotations.Path;
+import com.thinking.machines.webrock.annotations.*;
 
 public class TMWebRockStarter extends HttpServlet
 {
@@ -33,7 +33,7 @@ System.out.println("Class name: "+className);
 System.out.println("Class name w/ package: "+ pkg+"."+className);
 
 Class<?> c1 = Class.forName(pkg + "." + className);
-if(c1.isAnnotationPresent(Path.class))
+if(c1.isAnnotationPresent(Path.class))		//masterstroke: if class doesnt have Path annotation, it's methods wont be scanned
 {
 classes.add(c1);
 }
@@ -71,12 +71,12 @@ if(m1.isAnnotationPresent(Path.class))
 classPathAnnotation = c1.getAnnotation(Path.class).value();
 methodPathAnnotation = m1.getAnnotation(Path.class).value();
 
-
 service = new Service();
 service.setServiceClass(c1);
 String fullPath = classPathAnnotation + methodPathAnnotation;
 service.setPath(fullPath);
 service.setService(m1);
+if(m1.isAnnotationPresent(Forward.class)) service.setForwardTo(m1.getAnnotation(Forward.class).value());
 
 servicesMap.put(fullPath, service);
 }
@@ -96,6 +96,7 @@ service = entry1.getValue();
 System.out.println(service.getServiceClass());
 System.out.println(service.getPath());
 System.out.println(service.getService());
+System.out.println("Forward to: "+service.getForwardTo());
 System.out.println("");
 
 }
