@@ -37,8 +37,8 @@
 
 
 <servlet>
-<servlet-class>com.thinking.machines.webrock.TMWebRock</servlet-class>
 <servlet-name>TMWebRock</servlet-name>
+<servlet-class>com.thinking.machines.webrock.TMWebRock</servlet-class>
 </servlet>
 <servlet-mapping>
 <servlet-name>TMWebRock</servlet-name>
@@ -47,10 +47,22 @@
 
 
 <servlet>
-<servlet-class>com.thinking.machines.webrock.TMWebRockStarter</servlet-class>
 <servlet-name>TMWebRockStarter</servlet-name>
+<servlet-class>com.thinking.machines.webrock.TMWebRockStarter</servlet-class>
 	<load-on-startup>1</load-on-startup>
 </servlet>
+
+
+
+<!--test-->
+<servlet>
+<servlet-name>SomeClass</servlet-name>
+<servlet-class>test.SomeClass</servlet-class>
+</servlet>
+<servlet-mapping>
+<servlet-name>SomeClass</servlet-name>
+<url-pattern>/testservice/city/ujjain/gods</url-pattern>
+</servlet-mapping>
 
 
 </web-app>
