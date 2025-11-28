@@ -59,19 +59,28 @@ public class TMWebRockStarter extends HttpServlet {
             String methodPathAnnotation;
             for (Class<?> c1 : classes) {
                 for (Method m1 : c1.getDeclaredMethods()) {
-                    if (m1.isAnnotationPresent(Path.class)) {
-                        classPathAnnotation = c1.getAnnotation(Path.class).value();
-                        methodPathAnnotation = m1.getAnnotation(Path.class).value();
+                    
+                    if(c1.isAnnotationPresent(Path.class))
+                    {
+                        if (m1.isAnnotationPresent(Path.class)) {
+                            classPathAnnotation = c1.getAnnotation(Path.class).value();
+                            methodPathAnnotation = m1.getAnnotation(Path.class).value();
 
-                        service = new Service();
-                        service.setServiceClass(c1);
-                        String fullPath = classPathAnnotation + methodPathAnnotation;
-                        service.setPath(fullPath);
-                        service.setService(m1);
-                        if (m1.isAnnotationPresent(Forward.class))
-                            service.setForwardTo(m1.getAnnotation(Forward.class).value());
+                            service = new Service();
+                            service.setServiceClass(c1);
+                            String fullPath = classPathAnnotation + methodPathAnnotation;
+                            service.setPath(fullPath);
+                            service.setService(m1);
+                            if (m1.isAnnotationPresent(Forward.class))
+                                service.setForwardTo(m1.getAnnotation(Forward.class).value());
 
-                        servicesMap.put(fullPath, service);
+                            servicesMap.put(fullPath, service);
+                        }
+                    }
+                    
+                    if(m1.isAnnotationPresent(OnStartup.class))
+                    {
+
                     }
                 }
             }
