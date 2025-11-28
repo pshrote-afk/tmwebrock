@@ -12,11 +12,18 @@ import com.thinking.machines.webrock.annotations.*;
 
 public class TMWebRockStarter extends HttpServlet {
 
-    private void sortOnStartupList(onStartUpList)
+    private void sortOnStartupList(List<Service> onStartUpList)
     {
-
+        Comparator<Service> priorityComparator = new Comparator<>(){
+            public int compare(Service service1, Service service2)
+            {
+                return service1.getPriority() - service2.getPriority();
+            }
+        };  // anonymous class created
+        Collections.sort(onStartUpList,priorityComparator);
     }
-    private void executeOnStartupList(onStartupList)
+
+    private void executeOnStartupList(List<Service>onStartupList)
     {
        
     }
@@ -91,7 +98,7 @@ public class TMWebRockStarter extends HttpServlet {
                     if(m1.isAnnotationPresent(OnStartup.class))
                     {
                         service.setService(m1);
-                        service.setRunOnStartup(true);
+                        service.setRunOnStart(true);
                         service.setPriority(m1.getAnnotation(OnStartup.class).Priority());      // we will sort on the basis of this "priority" property
                         onStartupList.add(service); 
                     }
@@ -100,7 +107,7 @@ public class TMWebRockStarter extends HttpServlet {
             }
             servletContext.setAttribute("ServicesMap", servicesMap);
 
-            sortOnStartupList(onStartUpList);
+            sortOnStartupList(onStartupList);
             executeOnStartupList(onStartupList);  
 
             // testing
