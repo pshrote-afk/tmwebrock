@@ -12,6 +12,15 @@ import com.thinking.machines.webrock.annotations.*;
 
 public class TMWebRockStarter extends HttpServlet {
 
+    private void sortOnStartupList(onStartUpList)
+    {
+
+    }
+    private void executeOnStartupList(onStartupList)
+    {
+       
+    }
+
     private void scanRecursive(String pkg, Set<Class<?>> classes) throws URISyntaxException, ClassNotFoundException {
         String path = pkg.replace(".", "/"); // eg. convert bobby.test to bobby/test
         URL url = Thread.currentThread().getContextClassLoader().getResource(path); // Ask Tomcat’s classloader: “Give
@@ -51,23 +60,24 @@ public class TMWebRockStarter extends HttpServlet {
 
             Set<Class<?>> classes = new HashSet<>();
             this.scanRecursive(servicePackagePrefix, classes);
-            // all classes under "bobby", which has "Path" annotation, loaded into "classes"
+            // all classes under "bobby" loaded into "classes"
 
             // now iterate through each class' methods
+            List<Service> onStartupList = new ArrayList<>();
             Service service;
             String classPathAnnotation;
             String methodPathAnnotation;
             for (Class<?> c1 : classes) {
                 for (Method m1 : c1.getDeclaredMethods()) {
-                    
+                    service = new Service();
+                    service.setServiceClass(c1);
                     if(c1.isAnnotationPresent(Path.class))
                     {
                         if (m1.isAnnotationPresent(Path.class)) {
                             classPathAnnotation = c1.getAnnotation(Path.class).value();
                             methodPathAnnotation = m1.getAnnotation(Path.class).value();
 
-                            service = new Service();
-                            service.setServiceClass(c1);
+                            
                             String fullPath = classPathAnnotation + methodPathAnnotation;
                             service.setPath(fullPath);
                             service.setService(m1);
@@ -80,11 +90,18 @@ public class TMWebRockStarter extends HttpServlet {
                     
                     if(m1.isAnnotationPresent(OnStartup.class))
                     {
-
+                        service.setService(m1);
+                        service.setRunOnStartup(true);
+                        service.setPriority(m1.getAnnotation(OnStartup.class).Priority());      // we will sort on the basis of this "priority" property
+                        onStartupList.add(service); 
                     }
+
                 }
             }
             servletContext.setAttribute("ServicesMap", servicesMap);
+
+            sortOnStartupList(onStartUpList);
+            executeOnStartupList(onStartupList);  
 
             // testing
             Service service1;
