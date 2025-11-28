@@ -12,7 +12,7 @@ import com.thinking.machines.webrock.annotations.*;
 
 public class TMWebRockStarter extends HttpServlet {
 
-    private void sortOnStartupList(List<Service> onStartUpList)
+    private void sortOnStartupList(List<Service> onStartupList)
     {
         Comparator<Service> priorityComparator = new Comparator<>(){
             public int compare(Service service1, Service service2)
@@ -20,12 +20,30 @@ public class TMWebRockStarter extends HttpServlet {
                 return service1.getPriority() - service2.getPriority();
             }
         };  // anonymous class created
-        Collections.sort(onStartUpList,priorityComparator);
+        Collections.sort(onStartupList,priorityComparator);
     }
 
-    private void executeOnStartupList(List<Service>onStartupList)
+    private void executeOnStartupList(List<Service> onStartupList)
     {
-       
+        try
+        {
+        System.out.println("onStartupList size: " + onStartupList.size());
+        while(onStartupList.isEmpty()==false)
+        {
+            Service serviceObject = onStartupList.remove(0);
+            
+            System.out.println("\n" + serviceObject.getPriority());
+
+            Class<?> serviceClass = serviceObject.getServiceClass();
+            Method service = serviceObject.getService();
+            Object obj1 = serviceClass.getDeclaredConstructor().newInstance();
+            service.invoke(obj1);
+        }
+        System.out.println("onStartupList complete");
+        }catch(Exception exception)
+        {
+            System.out.println(exception);
+        }
     }
 
     private void scanRecursive(String pkg, Set<Class<?>> classes) throws URISyntaxException, ClassNotFoundException {
@@ -44,6 +62,7 @@ public class TMWebRockStarter extends HttpServlet {
             }
             if (f.getName().endsWith(".class")) {
                 String className = f.getName().replace(".class", "");
+                // important testing outputs
                 System.out.println("Class name: " + className);
                 System.out.println("Class name w/ package: " + pkg + "." + className);
 
@@ -97,6 +116,11 @@ public class TMWebRockStarter extends HttpServlet {
                     
                     if(m1.isAnnotationPresent(OnStartup.class))
                     {
+                        if(m1.getReturnType()!=void.class || m1.getParameterCount()!=0)
+                        {
+                            System.out.println("[Framework Error] " + m1.getName() + " with priority " + m1.getAnnotation(OnStartup.class).Priority() + " of class " + c1.getName() + " should have return type \"void\" and 0 paramters to enable @OnStartup\n");
+                            continue;
+                        }
                         service.setService(m1);
                         service.setRunOnStart(true);
                         service.setPriority(m1.getAnnotation(OnStartup.class).Priority());      // we will sort on the basis of this "priority" property
@@ -111,6 +135,7 @@ public class TMWebRockStarter extends HttpServlet {
             executeOnStartupList(onStartupList);  
 
             // testing
+            /*
             Service service1;
             Iterator<Map.Entry<String, Service>> iterator1 = servicesMap.entrySet().iterator();
             System.out.println("");
@@ -125,6 +150,7 @@ public class TMWebRockStarter extends HttpServlet {
                 System.out.println("");
 
             }
+            */
 
         } catch (Exception exception) {
             System.out.println(exception.getMessage());
