@@ -32,11 +32,7 @@ public class TMWebRockStarter extends HttpServlet {
                 System.out.println("Class name w/ package: " + pkg + "." + className);
 
                 Class<?> c1 = Class.forName(pkg + "." + className);
-                if (c1.isAnnotationPresent(Path.class)) // masterstroke: if class doesnt have Path annotation, it's
-                                                        // methods wont be scanned
-                {
-                    classes.add(c1);
-                }
+                classes.add(c1);
             }
         }
     }
