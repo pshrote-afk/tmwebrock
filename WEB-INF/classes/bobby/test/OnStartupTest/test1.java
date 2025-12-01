@@ -1,13 +1,28 @@
 package bobby.test.OnStartupTest;
 
 import com.thinking.machines.webrock.annotations.*;
+import com.thinking.machines.webrock.pojo.*;
 
+@InjectApplicationScope
 public class test1
 {
+private ApplicationScope applicationScope;
+
+public void setApplicationScope(ApplicationScope applicationScope)
+{
+this.applicationScope = applicationScope;
+}
+public ApplicationScope getApplicationScope()
+{
+return this.applicationScope;
+}
+
 @OnStartup(Priority=3)
 public void upRoot()
 {
 System.out.println("Priority 3. Startup method uproot() did something");
+applicationScope.setAttribute("appName","Some App");
+System.out.println("Application scope: " + applicationScope.getAttribute("appName"));
 }
 
 @OnStartup(Priority=5)
