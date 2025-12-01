@@ -1,4 +1,4 @@
-package com.thinking.machines.webrock;
+package com.thinking.machines.webrock.pojo;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
