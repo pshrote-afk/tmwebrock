@@ -38,13 +38,21 @@ public class TMWebRockStarter extends HttpServlet {
             Method service = serviceObject.getService();
             Object obj1 = serviceClass.getDeclaredConstructor().newInstance();
 
-            if(serviceObject.getInjectApplicationScope()==true)
+            if(serviceObject.getInjectApplicationScope()==true) // it is possible to give Application Scope to startup method
             {
                 // inject application scope
                 ApplicationScope applicationScope = new ApplicationScope(getServletContext());
                 Method method = obj1.getClass().getMethod("setApplicationScope",ApplicationScope.class);
                 method.invoke(obj1,applicationScope);
             }
+            if(serviceObject.getInjectApplicationDirectory()==true)
+            {
+                String realPath = getServletContext().getRealPath("/");
+                ApplicationDirectory applicationDirectory = new ApplicationDirectory(new File(realPath));
+                Method method = obj1.getClass().getMethod("setApplicationDirectory",ApplicationDirectory.class);
+                method.invoke(obj1,applicationDirectory);
+            }
+            
             service.invoke(obj1);
         }
         System.out.println("onStartupList complete");
@@ -110,6 +118,7 @@ public class TMWebRockStarter extends HttpServlet {
                     if(c1.isAnnotationPresent(InjectApplicationScope.class)) service.setInjectApplicationScope(true);
                     if(c1.isAnnotationPresent(InjectSessionScope.class)) service.setInjectSessionScope(true);
                     if(c1.isAnnotationPresent(InjectRequestScope.class)) service.setInjectRequestScope(true);
+                    if(c1.isAnnotationPresent(InjectApplicationDirectory.class)) service.setInjectApplicationDirectory(true);
                     
                     if(c1.isAnnotationPresent(Path.class))
                     {
