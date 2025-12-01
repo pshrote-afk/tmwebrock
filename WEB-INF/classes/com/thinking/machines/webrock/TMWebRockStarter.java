@@ -37,6 +37,14 @@ public class TMWebRockStarter extends HttpServlet {
             Class<?> serviceClass = serviceObject.getServiceClass();
             Method service = serviceObject.getService();
             Object obj1 = serviceClass.getDeclaredConstructor().newInstance();
+
+            if(serviceObject.getInjectApplicationScope()==true)
+            {
+                // inject application scope
+                ApplicationScope applicationScope = new ApplicationScope(getServletContext());
+                Method method = obj1.getClass().getMethod("setApplicationScope",ApplicationScope.class);
+                method.invoke(obj1,applicationScope);
+            }
             service.invoke(obj1);
         }
         System.out.println("onStartupList complete");
@@ -97,6 +105,12 @@ public class TMWebRockStarter extends HttpServlet {
                 for (Method m1 : c1.getDeclaredMethods()) {
                     service = new Service();
                     service.setServiceClass(c1);
+
+                    // check for injection scopes
+                    if(c1.isAnnotationPresent(InjectApplicationScope.class)) service.setInjectApplicationScope(true);
+                    if(c1.isAnnotationPresent(InjectSessionScope.class)) service.setInjectSessionScope(true);
+                    if(c1.isAnnotationPresent(InjectRequestScope.class)) service.setInjectRequestScope(true);
+                    
                     if(c1.isAnnotationPresent(Path.class))
                     {
                         if (m1.isAnnotationPresent(Path.class)) {
