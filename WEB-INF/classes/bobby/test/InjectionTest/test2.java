@@ -6,12 +6,14 @@ import com.thinking.machines.webrock.pojo.*;
 @InjectApplicationScope
 @InjectSessionScope
 @InjectRequestScope
+@InjectApplicationDirectory
 @Path("/injection")
 public class test2
 {
 private ApplicationScope applicationScope;
 private SessionScope sessionScope;
 private RequestScope requestScope;
+private ApplicationDirectory applicationDirectory;
 
 public void setApplicationScope(ApplicationScope applicationScope)
 {
@@ -42,6 +44,15 @@ public RequestScope getRequestScope()
 return this.requestScope;
 }
 
+public void setApplicationDirectory(ApplicationDirectory applicationDirectory)
+{
+this.applicationDirectory = applicationDirectory;
+}
+public ApplicationDirectory getApplicationDirectory()
+{
+return this.applicationDirectory;
+}
+
 //services start
 @Path("/add")
 public void someMethod1()
@@ -52,6 +63,7 @@ requestScope.setAttribute("name","username");
 System.out.println("someMethod() from InjectionTest folder ran: "+requestScope.getAttribute("name"));
 System.out.println("someMethod() from InjectionTest folder ran: "+sessionScope.getAttribute("id"));
 System.out.println("someMethod() from InjectionTest folder ran: "+applicationScope.getAttribute("age"));
+System.out.println("someMethod() from InjectionTest folder ran: "+applicationDirectory.getDirectory());
 }
 
 @Path("/get")

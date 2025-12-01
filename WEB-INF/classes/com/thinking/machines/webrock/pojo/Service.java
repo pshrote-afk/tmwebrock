@@ -14,6 +14,7 @@ private int priority;
 private boolean injectApplicationScope;
 private boolean injectSessionScope;
 private boolean injectRequestScope;
+private boolean injectApplicationDirectory;
 
 public Service()
 {
@@ -26,6 +27,7 @@ int priority = 0;
 injectApplicationScope = false;
 injectSessionScope = false;
 injectRequestScope = false;
+injectApplicationDirectory = false;
 }
 
 public void setServiceClass(Class serviceClass)
@@ -107,6 +109,15 @@ this.injectRequestScope = injectRequestScope;
 public boolean getInjectRequestScope()
 {
 return this.injectRequestScope;
+}
+
+public void setInjectApplicationDirectory(boolean injectApplicationDirectory)
+{
+this.injectApplicationDirectory = injectApplicationDirectory;
+}
+public boolean getInjectApplicationDirectory()
+{
+return this.injectApplicationDirectory;
 }
 
 }
