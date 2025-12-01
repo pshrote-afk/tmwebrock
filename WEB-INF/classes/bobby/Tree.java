@@ -5,9 +5,11 @@ import com.thinking.machines.webrock.annotations.*;
 @Path("/tree")
 public class Tree
 {
+
+@OnStartup(Priority=3)
 public void upRoot()
 {
-System.out.println("Method uproot() did something");
+System.out.println("Priority 3. Startup method uproot() did something");
 }
 
 //example 1 of forward
