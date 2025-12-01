@@ -9,11 +9,11 @@ private Class serviceClass;
 private String path;
 private Method service;
 private String forwardTo;
-boolean runOnStart;
-int priority;
-boolean injectApplicationScope;
-boolean injectSessionScope;
-boolean injectRequestScope;
+private boolean runOnStart;
+private int priority;
+private boolean injectApplicationScope;
+private boolean injectSessionScope;
+private boolean injectRequestScope;
 
 public Service()
 {
