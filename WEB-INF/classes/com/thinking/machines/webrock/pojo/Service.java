@@ -9,8 +9,11 @@ private Class serviceClass;
 private String path;
 private Method service;
 private String forwardTo;
-boolean runOnStart;
-int priority;
+private boolean runOnStart;
+private int priority;
+private boolean injectApplicationScope;
+private boolean injectSessionScope;
+private boolean injectRequestScope;
 
 public Service()
 {
@@ -20,6 +23,9 @@ service = null;
 forwardTo = null;
 boolean runOnStart = false;
 int priority = 0;
+injectApplicationScope = false;
+injectSessionScope = false;
+injectRequestScope = false;
 }
 
 public void setServiceClass(Class serviceClass)
@@ -74,6 +80,33 @@ this.priority = priority;
 public int getPriority()
 {
 return this.priority;
+}
+
+public void setInjectApplicationScope(boolean injectApplicationScope)
+{
+this.injectApplicationScope = injectApplicationScope;
+}
+public boolean getInjectApplicationScope()
+{
+return this.injectApplicationScope;
+}
+
+public void setInjectSessionScope(boolean injectSessionScope)
+{
+this.injectSessionScope = injectSessionScope;
+}
+public boolean getInjectSessionScope()
+{
+return this.injectSessionScope;
+}
+
+public void setInjectRequestScope(boolean injectRequestScope)
+{
+this.injectRequestScope = injectRequestScope;
+}
+public boolean getInjectRequestScope()
+{
+return this.injectRequestScope;
 }
 
 }

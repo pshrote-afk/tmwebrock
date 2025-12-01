@@ -12,6 +12,49 @@ import com.thinking.machines.webrock.annotations.*;
 
 public class TMWebRock extends HttpServlet {
 
+    private void injectDependencies(Service serviceObject, Object obj1, HttpServletRequest request)
+    {
+        if(serviceObject.getInjectApplicationScope()==true)
+        {
+            ApplicationScope applicationScope = new ApplicationScope(getServletContext());
+            try
+            {
+                Method method = obj1.getClass().getMethod("setApplicationScope",ApplicationScope.class);
+                method.invoke(obj1,applicationScope);
+            }catch(Exception exception)
+            {
+                System.out.println(exception);
+            }
+            
+        }
+        if(serviceObject.getInjectSessionScope()==true)
+        {
+            SessionScope sessionScope = new SessionScope(request.getSession());
+            try
+            {
+                Method method = obj1.getClass().getMethod("setSessionScope",SessionScope.class);
+                method.invoke(obj1,sessionScope);
+            }catch(Exception exception)
+            {
+                System.out.println(exception);
+            }
+            
+        }
+        if(serviceObject.getInjectRequestScope()==true)
+        {
+            RequestScope requestScope = new RequestScope(request);
+            try
+            {
+                Method method = obj1.getClass().getMethod("setRequestScope",RequestScope.class);
+                method.invoke(obj1,requestScope);
+            }catch(Exception exception)
+            {
+                System.out.println(exception);
+            }
+            
+        }
+
+    }
     public void service(HttpServletRequest request, HttpServletResponse response) {
         try {
             String uri = request.getRequestURI(); // eg. "/tmwebrock/schoolservice/student/update"
@@ -127,6 +170,7 @@ public class TMWebRock extends HttpServlet {
 
             // part 3
             Object obj1 = serviceClass.getDeclaredConstructor().newInstance();
+            injectDependencies(serviceObject,obj1,request);
             Object returnResponse;
             returnResponse = service.invoke(obj1);
             if (returnResponse == null)
@@ -140,6 +184,7 @@ public class TMWebRock extends HttpServlet {
                     service = serviceForwardObject.getService();
 
                     Object obj2 = serviceClass.getDeclaredConstructor().newInstance();
+                    injectDependencies(serviceForwardObject,obj2,request);
                     returnResponse = service.invoke(obj2);
                     if (returnResponse == null)
                         returnResponse = ""; // return empty string if "service" has "void" return type
@@ -184,6 +229,7 @@ public class TMWebRock extends HttpServlet {
 
             // part 3
             Object obj1 = serviceClass.getDeclaredConstructor().newInstance();
+            injectDependencies(serviceObject,obj1,request);
             Object returnResponse;
             returnResponse = service.invoke(obj1);
             if (returnResponse == null)
@@ -197,6 +243,7 @@ public class TMWebRock extends HttpServlet {
                     service = serviceForwardObject.getService();
 
                     Object obj2 = serviceClass.getDeclaredConstructor().newInstance();
+                    injectDependencies(serviceForwardObject,obj2,request);
                     returnResponse = service.invoke(obj2);
                     if (returnResponse == null)
                         returnResponse = ""; // return empty string if "service" has "void" return type
