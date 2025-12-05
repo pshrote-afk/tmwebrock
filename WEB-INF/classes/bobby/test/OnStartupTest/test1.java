@@ -2,6 +2,7 @@ package bobby.test.OnStartupTest;
 
 import com.thinking.machines.webrock.annotations.*;
 import com.thinking.machines.webrock.pojo.*;
+import bobby.test.AutoWiredTest.*;
 
 @InjectApplicationDirectory
 @InjectApplicationScope
@@ -36,6 +37,11 @@ System.out.println("Priority 3. Startup method uproot() did something");
 applicationScope.setAttribute("appName","Some App");
 System.out.println("Application scope: " + applicationScope.getAttribute("appName"));
 System.out.println("File directory: "+applicationDirectory.getDirectory());
+
+// for testing @AutoWired
+Student student = new Student();
+student.setName("Palash");
+applicationScope.setAttribute("xyz",student);
 }
 
 @OnStartup(Priority=5)

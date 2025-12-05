@@ -1,5 +1,6 @@
 package com.thinking.machines.webrock.pojo;
 
+import java.util.*;
 import java.lang.reflect.*;
 import com.thinking.machines.webrock.annotations.*;
 
@@ -15,6 +16,7 @@ private boolean injectApplicationScope;
 private boolean injectSessionScope;
 private boolean injectRequestScope;
 private boolean injectApplicationDirectory;
+ArrayList<AutoWiredBundle> autoWiredBundles;
 
 public Service()
 {
@@ -22,12 +24,13 @@ serviceClass = null;
 path = null;
 service = null;
 forwardTo = null;
-boolean runOnStart = false;
-int priority = 0;
+runOnStart = false;
+priority = 0;
 injectApplicationScope = false;
 injectSessionScope = false;
 injectRequestScope = false;
 injectApplicationDirectory = false;
+autoWiredBundles = null;
 }
 
 public void setServiceClass(Class serviceClass)
@@ -118,6 +121,15 @@ this.injectApplicationDirectory = injectApplicationDirectory;
 public boolean getInjectApplicationDirectory()
 {
 return this.injectApplicationDirectory;
+}
+
+public void setAutoWiredBundles(ArrayList<AutoWiredBundle> autoWiredBundles)
+{
+this.autoWiredBundles = autoWiredBundles;
+}
+public ArrayList<AutoWiredBundle> getAutoWiredBundles()
+{
+return this.autoWiredBundles;
 }
 
 }
