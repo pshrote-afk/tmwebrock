@@ -12,6 +12,23 @@ import com.thinking.machines.webrock.annotations.*;
 
 public class TMWebRockStarter extends HttpServlet {
 
+    private void populateAutoWiredDataStructure(ArrayList<AutoWiredBundle> autoWiredBundles,Class c1)
+    {
+        AutoWiredBundle bundle;
+        for(Field field : c1.getDeclaredFields())
+        {
+            if(field.isAnnotationPresent(AutoWired.class))
+            {
+                String name = field.getAnnotation(AutoWired.class).name();
+
+                bundle = new AutoWiredBundle();
+                bundle.setField(field);
+                bundle.setAutoWiredName(name);
+                autoWiredBundles.add(bundle);
+            } 
+        }
+    }
+
     private void sortOnStartupList(List<Service> onStartupList)
     {
         Comparator<Service> priorityComparator = new Comparator<>(){
@@ -106,6 +123,7 @@ public class TMWebRockStarter extends HttpServlet {
 
             // now iterate through each class' methods
             List<Service> onStartupList = new ArrayList<>();
+            ArrayList<AutoWiredBundle> autoWiredBundles;
             Service service;
             String classPathAnnotation;
             String methodPathAnnotation;
@@ -120,8 +138,14 @@ public class TMWebRockStarter extends HttpServlet {
                     if(c1.isAnnotationPresent(InjectRequestScope.class)) service.setInjectRequestScope(true);
                     if(c1.isAnnotationPresent(InjectApplicationDirectory.class)) service.setInjectApplicationDirectory(true);
                     
-                    if(c1.isAnnotationPresent(Path.class))
+                    autoWiredBundles = new ArrayList<>();
+                    populateAutoWiredDataStructure(autoWiredBundles,c1); // in this class, all fields with @AutoWired should be added to this DS. This DS will be attached to Service type object representing this particular service
+                    service.setAutoWiredBundles(autoWiredBundles);
+
+                    if(c1.isAnnotationPresent(Path.class)) // if there was @Path on class means it is definitely intended to be used as a service
                     {
+                       
+                        // add service
                         if (m1.isAnnotationPresent(Path.class)) {
                             classPathAnnotation = c1.getAnnotation(Path.class).value();
                             methodPathAnnotation = m1.getAnnotation(Path.class).value();
@@ -137,6 +161,8 @@ public class TMWebRockStarter extends HttpServlet {
                         }
                     }
                     
+                    // if there was no @Path on class, but there is @Path on method, then it may be a startup method. A service method can also be a startup method
+                    // @OnStartup methods will not have @AutoWired feature available for the time being
                     if(m1.isAnnotationPresent(OnStartup.class))
                     {
                         if(m1.getReturnType()!=void.class || m1.getParameterCount()!=0)
