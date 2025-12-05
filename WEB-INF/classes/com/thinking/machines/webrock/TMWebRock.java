@@ -12,6 +12,68 @@ import com.thinking.machines.webrock.annotations.*;
 
 public class TMWebRock extends HttpServlet {
 
+    private void autoWire(ArrayList<AutoWiredBundle> autoWiredBundles, Object obj1, HttpServletRequest request)
+    {
+        if(autoWiredBundles==null) return;      // Meaning: no property of this class has @AutoWired annotation
+        Field field; 
+        String autoWiredName;
+        String setterMethod;        // String which will be passed to search for setter method
+        Method method;      // actual method which will be invoked
+        int indexToCapitalize = 3;
+        for(AutoWiredBundle bundle : autoWiredBundles)
+        {
+            field = bundle.getField();
+            autoWiredName = bundle.getAutoWiredName();
+            Class<?> fieldType = field.getType();
+
+            Object found = null;
+            HttpSession session = request.getSession();
+            ServletContext servletContext = getServletContext();
+
+            // search 3 scopes in ascending order
+            while(true) // run loop only once
+            {
+                found = request.getAttribute(autoWiredName);
+                if(found!=null && fieldType.isInstance(found))      // 2nd condition is necessary, because we might find "xyz" of Bulb type in request scope. But we are looking for "xyz" of Student type. Since each scope can have a unique key-value pair, we move to the next scope.
+                {  
+                    break;
+                }
+
+                found = session.getAttribute(autoWiredName);
+                if(found!=null && fieldType.isInstance(found))     
+                {  
+                    break;
+                }
+
+                found = servletContext.getAttribute(autoWiredName);
+                if(found!=null && fieldType.isInstance(found))      
+                {  
+                    break;
+                }
+
+                break;
+            }
+            // at this point either "found" is null, or has some value. If null, we will set value regardless, print [Framework Error], and skip to next iteration. 
+            if(found==null) 
+            {
+                System.out.println("[Framework Error] " + "Property " + "\"" + field.getName() + "\"" + " of " + field.getDeclaringClass() + " is set as null, as @AutoWired(name=\""+ autoWiredName +"\") returned null after searching request, session and application scope\n");                            
+                continue;
+            }
+
+            setterMethod = "set" + field.getName();     // setterMethod = "setstudent";
+            setterMethod = setterMethod.substring(0, indexToCapitalize) + Character.toUpperCase(setterMethod.charAt(indexToCapitalize)) + setterMethod.substring(indexToCapitalize + 1);  // setterMethod = "setStudent";
+            try {                            
+            method = obj1.getClass().getMethod(setterMethod, fieldType);     // This line is prone to error. If framework user does not write setter in camel case.
+            method.invoke(obj1,found);
+            } catch (Exception exception) 
+            {
+                System.out.println("[Framework Error] " + exception);
+            }
+
+        }
+
+    }
+
     private void injectDependencies(Service serviceObject, Object obj1, HttpServletRequest request)
     {
         if(serviceObject.getInjectApplicationScope()==true)
@@ -159,7 +221,7 @@ public class TMWebRock extends HttpServlet {
     }
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) {
-        System.out.println("Routed to/ran doGet");
+        System.out.println("Routed to doGet");
         try {
             PrintWriter pw = response.getWriter();
             response.setContentType("text/plain");
@@ -184,7 +246,14 @@ public class TMWebRock extends HttpServlet {
 
             // part 3
             Object obj1 = serviceClass.getDeclaredConstructor().newInstance();
+            
+            // inject dependencies
             injectDependencies(serviceObject,obj1,request);
+
+            // fulfill @AutoWired
+            ArrayList<AutoWiredBundle> autoWiredBundles = serviceObject.getAutoWiredBundles();
+            autoWire(autoWiredBundles, obj1, request);
+            
             Object returnResponse;
             returnResponse = service.invoke(obj1);
             if (returnResponse == null)
@@ -198,7 +267,11 @@ public class TMWebRock extends HttpServlet {
                     service = serviceForwardObject.getService();
 
                     Object obj2 = serviceClass.getDeclaredConstructor().newInstance();
+            
                     injectDependencies(serviceForwardObject,obj2,request);
+                    autoWiredBundles = serviceForwardObject.getAutoWiredBundles();
+                    autoWire(autoWiredBundles, obj2, request);
+            
                     returnResponse = service.invoke(obj2);
                     if (returnResponse == null)
                         returnResponse = ""; // return empty string if "service" has "void" return type
@@ -213,12 +286,15 @@ public class TMWebRock extends HttpServlet {
             pw.print(returnResponse);
             pw.flush();
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println("[Framework Error] " + e.getCause());
+            StackTraceElement stackTraceElement = e.getCause().getStackTrace()[0];
+            System.out.println(stackTraceElement.getFileName() + " : " + stackTraceElement.getLineNumber());
+            System.out.print("\n");
         }
     }
 
     public void doPost(HttpServletRequest request, HttpServletResponse response) {
-        System.out.println("Routed to/ran doPost");
+        System.out.println("Routed to doPost");
         try {
             PrintWriter pw = response.getWriter();
             response.setContentType("text/plain");
@@ -243,7 +319,14 @@ public class TMWebRock extends HttpServlet {
 
             // part 3
             Object obj1 = serviceClass.getDeclaredConstructor().newInstance();
+           
+            // inject dependencies
             injectDependencies(serviceObject,obj1,request);
+
+            // fulfill @AutoWired
+            ArrayList<AutoWiredBundle> autoWiredBundles = serviceObject.getAutoWiredBundles();
+            autoWire(autoWiredBundles, obj1, request);
+
             Object returnResponse;
             returnResponse = service.invoke(obj1);
             if (returnResponse == null)
@@ -258,6 +341,9 @@ public class TMWebRock extends HttpServlet {
 
                     Object obj2 = serviceClass.getDeclaredConstructor().newInstance();
                     injectDependencies(serviceForwardObject,obj2,request);
+                    autoWiredBundles = serviceForwardObject.getAutoWiredBundles();
+                    autoWire(autoWiredBundles, obj2, request);
+
                     returnResponse = service.invoke(obj2);
                     if (returnResponse == null)
                         returnResponse = ""; // return empty string if "service" has "void" return type
@@ -272,7 +358,10 @@ public class TMWebRock extends HttpServlet {
             pw.print(returnResponse);
             pw.flush();
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println("[Framework Error] " + e.getCause());
+            StackTraceElement stackTraceElement = e.getCause().getStackTrace()[0];
+            System.out.println(stackTraceElement.getFileName() + " : " + stackTraceElement.getLineNumber());
+            System.out.print("\n");
         }
     } // end of post
 } // end of class
